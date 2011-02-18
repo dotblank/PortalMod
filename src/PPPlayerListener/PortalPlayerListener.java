@@ -276,15 +276,26 @@ public class PortalPlayerListener extends PlayerListener {
 					//if(!(options == 1 || options == 3))
 						//installImprint(player, player.getLocation());
 					event.setTo(loc);
-					//event.setFrom(loc);
-					//event.getPlayer().teleportTo(loc);
+					event.setFrom(loc);
+					event.getPlayer().teleportTo(loc);
+					event.setCancelled(true);
+				}
+				else
+				{
+					event.setTo(event.getTo());
+					event.setFrom(event.getFrom());
+					event.setCancelled(true);
 				}
 				
 			}
-			
-
 			}
-		event.setCancelled(true);
+		else
+		{
+			event.setTo(event.getTo());
+			event.setFrom(event.getFrom());
+			event.setCancelled(true);
+		}
+		
 		return;
     }
 }
