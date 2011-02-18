@@ -278,23 +278,10 @@ public class PortalPlayerListener extends PlayerListener {
 					event.setTo(loc);
 					event.setFrom(loc);
 					event.getPlayer().teleportTo(loc);
-					event.setCancelled(true);
-				}
-				else
-				{
-					event.setTo(event.getTo());
-					event.setFrom(event.getFrom());
-					event.setCancelled(true);
 				}
 				
 			}
 			}
-		else
-		{
-			event.setTo(event.getTo());
-			event.setFrom(event.getFrom());
-			event.setCancelled(true);
-		}
 		
 		return;
     }

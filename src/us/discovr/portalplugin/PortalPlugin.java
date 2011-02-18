@@ -46,6 +46,8 @@ public class PortalPlugin extends JavaPlugin {
 
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
         PluginDescriptionFile pdfFile = this.getDescription();
+        int limit = getConfiguration().getInt("border-limit", 1000);
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
+        System.out.println( pdfFile.getName() + " portal distance limit: " + limit );
     }
 }
