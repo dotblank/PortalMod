@@ -63,7 +63,11 @@ public class PortalPlayerListener extends PlayerListener {
 		return (int) Math.ceil(total);
 	}
     public void onPlayerMove(PlayerMoveEvent event)
-    {
+    {	
+
+    	if(event.isCancelled())
+    		return;
+    	
     	Location to = event.getTo();
     	World w = event.getPlayer().getWorld();
 		/*
@@ -271,13 +275,16 @@ public class PortalPlayerListener extends PlayerListener {
 					
 					//if(!(options == 1 || options == 3))
 						//installImprint(player, player.getLocation());
-					event.getPlayer().teleportTo(loc);
+					event.setTo(loc);
+					//event.setFrom(loc);
+					//event.getPlayer().teleportTo(loc);
 				}
 				
 			}
 			
 
 			}
+		event.setCancelled(true);
 		return;
     }
 }
