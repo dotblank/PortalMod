@@ -1,7 +1,11 @@
 package us.discovr.portalplugin;
 
 import java.io.File;
+import java.util.HashMap;
+
+import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -13,7 +17,7 @@ import PPPlayerListener.PortalPlayerListener;
 
 public class PortalPlugin extends JavaPlugin {
     private final PortalPlayerListener listener = new PortalPlayerListener(this);
-    //private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
+    public final HashMap<Player, Location> lastposition = new HashMap<Player, Location>();
 
     public PortalPlugin(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
         super(pluginLoader, instance, desc, folder, plugin, cLoader);
@@ -41,6 +45,7 @@ public class PortalPlugin extends JavaPlugin {
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvent(Event.Type.PLAYER_MOVE, listener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.PLAYER_QUIT, listener, Priority.Normal, this);
         //pm.registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.Normal, this);
         //pm.registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
 

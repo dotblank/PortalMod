@@ -1,5 +1,6 @@
 package PPPlayerListener;
 import org.bukkit.Location;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.World;
@@ -62,14 +63,32 @@ public class PortalPlayerListener extends PlayerListener {
 		}
 		return (int) Math.ceil(total);
 	}
+	public void onPlayerQuit(PlayerEvent event)
+	{
+		plugin.lastposition.remove(event.getPlayer());
+	}
     public void onPlayerMove(PlayerMoveEvent event)
-    {	
+    {
 
     	if(event.isCancelled())
     		return;
-    	
     	Location to = event.getTo();
+    	Location lastPos = plugin.lastposition.get(event.getPlayer());
+    	
+    	if(lastPos!=null)
+    	{
+    		//System.out.println("Player " + event.getPlayer().getName() + " moved to " + to);
+    		if(Math.abs(to.getBlockX()-lastPos.getBlockX()) < 1)
+    			if(Math.abs(to.getBlockZ()-lastPos.getBlockZ()) < 1)
+    				if(Math.abs(to.getBlockY()-lastPos.getBlockY()) < 1)
+    					return;
+    	}
     	World w = event.getPlayer().getWorld();
+    	plugin.lastposition.put(event.getPlayer(), to);
+    	//System.out.println("Player " + event.getPlayer().getName() + " moved a block");
+    	
+    	
+    	
 		/*
 		if(to.x < 0)
 			to.x -= 1;
@@ -78,7 +97,7 @@ public class PortalPlayerListener extends PlayerListener {
 		if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==70 || w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ()) == 90)
 		{
 			
-			System.out.println("Player pushed a button");
+			//System.out.println("Player pushed a button");
 			int orientationlevel = (int) to.getY()-1;
 			int oX = (int)to.getX();
 			int oZ = (int) to.getZ();
