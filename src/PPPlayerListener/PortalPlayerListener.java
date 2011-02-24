@@ -89,11 +89,12 @@ public class PortalPlayerListener extends PlayerListener {
     	
     	
     	
-		/*
-		if(to.x < 0)
-			to.x -= 1;
+		
+		if(to.getX() < 0)
+			to.setX(to.getX()-1);
 		if(to.getZ() < 0)
-			to.getZ() -= 1;*/
+			to.setZ(to.getZ()-1);
+		
 		if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==70 || w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ()) == 90)
 		{
 			
@@ -291,12 +292,13 @@ public class PortalPlayerListener extends PlayerListener {
 				if(Math.abs(loc.getX()-event.getPlayer().getWorld().getSpawnLocation().getX())<=limit 
 						&& Math.abs(loc.getZ()-event.getPlayer().getWorld().getSpawnLocation().getZ())<=limit)
 				{
-					
+					//This behaviour varies with bukkit version odly
 					//if(!(options == 1 || options == 3))
 						//installImprint(player, player.getLocation());
 					event.setTo(loc);
-					event.setFrom(loc);
+					//event.setFrom(loc);
 					event.getPlayer().teleportTo(loc);
+					//event.setCancelled(true);
 				}
 				
 			}
