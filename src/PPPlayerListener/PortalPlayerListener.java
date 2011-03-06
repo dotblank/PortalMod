@@ -12,7 +12,8 @@ public class PortalPlayerListener extends PlayerListener {
     public PortalPlayerListener(PortalPlugin instance) {
         plugin = instance;
     }
-	public int getEncodeVal(int X, int Z, int Y, World w){
+    
+	public int getEncodeVal(int X, int Z, int Y, World w) {
 		int id = w.getBlockTypeIdAt(X, Y, Z);
 		//int id = w.getBlockTypeIdAt(X, Y, Z);
 		switch (id){
@@ -30,8 +31,8 @@ public class PortalPlayerListener extends PlayerListener {
 		}
 		
 	}
-	private int find2dir(int x, int z , int y, World w)
-	{
+	
+	private int find2dir(int x, int z , int y, World w) {
 		int dir = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
 		if(w.getBlockTypeIdAt(x-1, y, z)==84)
 			dir = 0;
@@ -54,29 +55,29 @@ public class PortalPlayerListener extends PlayerListener {
 		return dir;
 		
 	}
-	private int convertbase(int[] code,int codenum)
-	{
+	
+	private int convertbase(int[] code,int codenum) {
 		int total = 0;
-		for(int i = 0; i < codenum; i++)
-		{
+		for(int i = 0; i < codenum; i++) {
 			total += code[i]*Math.pow(8, (codenum-1)-i);
 		}
 		return (int) Math.ceil(total);
 	}
-	public void onPlayerQuit(PlayerEvent event)
-	{
+	
+	@Override
+	public void onPlayerQuit(PlayerEvent event) {
 		plugin.lastposition.remove(event.getPlayer());
 	}
-    public void onPlayerMove(PlayerMoveEvent event)
-    {
+	
+	@Override
+    public void onPlayerMove(PlayerMoveEvent event) {
 
     	if(event.isCancelled())
     		return;
     	Location to = event.getTo();
     	Location lastPos = plugin.lastposition.get(event.getPlayer());
     	
-    	if(lastPos!=null)
-    	{
+    	if(lastPos!=null) {
     		//System.out.println("Player " + event.getPlayer().getName() + " moved to " + to);
     		if(Math.abs(to.getBlockX()-lastPos.getBlockX()) < 1)
     			if(Math.abs(to.getBlockZ()-lastPos.getBlockZ()) < 1)
@@ -87,16 +88,17 @@ public class PortalPlayerListener extends PlayerListener {
     	plugin.lastposition.put(event.getPlayer(), to);
     	//System.out.println("Player " + event.getPlayer().getName() + " moved a block");
     	
-    	
-    	
-		
+    	//This causes the Player moved wrongly error
+		/*
 		if(to.getX() < 0)
 			to.setX(to.getX()-1);
 		if(to.getZ() < 0)
 			to.setZ(to.getZ()-1);
-		
-		if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==70 || w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ()) == 90)
-		{
+		*/
+    	
+    	//better check for code above
+		if(w.getBlockTypeIdAt((int)(to.getX() < 0 ? to.getX()-1 : to.getX()), (int)to.getY(), (int)(to.getZ() < 0 ? to.getZ()-1 : to.getZ()))==70 ||
+				w.getBlockTypeIdAt((int)(to.getX() < 0 ? to.getX()-1 : to.getX()), (int)to.getY(), (int)(to.getZ() < 0 ? to.getZ()-1 : to.getZ())) == 90) {
 			
 			//System.out.println("Player pushed a button");
 			int orientationlevel = (int) to.getY()-1;
@@ -106,8 +108,7 @@ public class PortalPlayerListener extends PlayerListener {
 			int scode2 = 1;
 			//check for jukebox
 			int readdirection = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
-			if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==90)
-			{
+			if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==90) {
 				orientationlevel = (int) to.getY()-2;
 				if(w.getBlockTypeIdAt(oX-1, orientationlevel, oZ)==84)
 					readdirection = 0;
@@ -131,8 +132,7 @@ public class PortalPlayerListener extends PlayerListener {
 			
 			if(readdirection == -1)
 				return;
-			else
-			{
+			else {
 				float rotation = 0;
 				int options = 0;
 				boolean yset =false;
@@ -161,8 +161,7 @@ public class PortalPlayerListener extends PlayerListener {
 					else
 						scode2 = 1;
 					
-					if(w.getBlockTypeIdAt(oX-1, orientationlevel-1, oZ)!=0)
-					{
+					if(w.getBlockTypeIdAt(oX-1, orientationlevel-1, oZ)!=0) {
 						codeY[0] = getEncodeVal(oX-1,oZ,orientationlevel-1,w);
 						codeY[1] = getEncodeVal(oX-1,oZ,orientationlevel-2,w);
 						codeY[2] = getEncodeVal(oX-1,oZ,orientationlevel-3,w);
@@ -188,8 +187,7 @@ public class PortalPlayerListener extends PlayerListener {
 					else
 						scode2 = 1;
 					
-					if(w.getBlockTypeIdAt(oX, orientationlevel-1, oZ-1)!=0)
-					{
+					if(w.getBlockTypeIdAt(oX, orientationlevel-1, oZ-1)!=0) {
 						codeY[0] = getEncodeVal(oX,oZ-1,orientationlevel-1,w);
 						codeY[1] = getEncodeVal(oX,oZ-1,orientationlevel-2,w);
 						codeY[2] = getEncodeVal(oX,oZ-1,orientationlevel-3,w);
@@ -215,8 +213,7 @@ public class PortalPlayerListener extends PlayerListener {
 					else
 						scode2 = -1;
 					
-					if(w.getBlockTypeIdAt(oX+1, orientationlevel-1, oZ)!=0)
-					{
+					if(w.getBlockTypeIdAt(oX+1, orientationlevel-1, oZ)!=0) {
 						codeY[0] = getEncodeVal(oX+1,oZ,orientationlevel-1,w);
 						codeY[1] = getEncodeVal(oX+1,oZ,orientationlevel-2,w);
 						codeY[2] = getEncodeVal(oX+1,oZ,orientationlevel-3,w);
@@ -243,8 +240,7 @@ public class PortalPlayerListener extends PlayerListener {
 					else
 						scode2 = -1;
 					
-					if(w.getBlockTypeIdAt(oX, orientationlevel-1, oZ+1)!=0)
-					{
+					if(w.getBlockTypeIdAt(oX, orientationlevel-1, oZ+1)!=0) {
 						codeY[0] = getEncodeVal(oX,oZ+1,orientationlevel-1,w);
 						codeY[1] = getEncodeVal(oX,oZ+1,orientationlevel-2,w);
 						codeY[2] = getEncodeVal(oX,oZ+1,orientationlevel-3,w);
@@ -256,15 +252,13 @@ public class PortalPlayerListener extends PlayerListener {
 				int goto1 = convertbase(code1,4)*scode1;
 				int goto2 = convertbase(code2,4)*scode2;
 				Location loc = new Location(w, 0,0,0);
-				if(xcodenum == 1)
-				{
+				if(xcodenum == 1) {
 					loc.setX(oX+goto1);
 					//loc.x = oX+goto1;
 					loc.setZ(oZ+goto2);
 					//loc.z = oZ+goto2;
 				}
-				if(xcodenum == 2)
-				{
+				if(xcodenum == 2) {
 					loc.setX(oX+goto2);
 					//loc.x = oX+goto2;
 					loc.setZ(oZ+goto1);
@@ -290,8 +284,7 @@ public class PortalPlayerListener extends PlayerListener {
 				//	loc.z += 0.5f;
 				int limit = plugin.getConfiguration().getInt("border-limit", 1000);
 				if(Math.abs(loc.getX()-event.getPlayer().getWorld().getSpawnLocation().getX())<=limit 
-						&& Math.abs(loc.getZ()-event.getPlayer().getWorld().getSpawnLocation().getZ())<=limit)
-				{
+						&& Math.abs(loc.getZ()-event.getPlayer().getWorld().getSpawnLocation().getZ())<=limit) {
 					//This behaviour varies with bukkit version odly
 					//if(!(options == 1 || options == 3))
 						//installImprint(player, player.getLocation());
