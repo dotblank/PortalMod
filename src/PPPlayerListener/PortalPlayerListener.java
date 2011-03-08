@@ -22,14 +22,13 @@ public class PortalPlayerListener extends PlayerListener {
 		case 5: return 1; 
 		case 17: return 2; 
 		case 4: return 3;
-		case 58: return 4; 
-		case 61: return 5;					
+		case 58: return 4;
+		case 61: return 5;
 		case 54: return 6;
 		case 47: return 6;
 		case 20: return 7;
 		default: return 0;
 		}
-		
 	}
 	
 	private int find2dir(int x, int z , int y, World w) {
@@ -100,15 +99,16 @@ public class PortalPlayerListener extends PlayerListener {
 		if(w.getBlockTypeIdAt((int)(to.getX() < 0 ? to.getX()-1 : to.getX()), (int)to.getY(), (int)(to.getZ() < 0 ? to.getZ()-1 : to.getZ()))==70 ||
 				w.getBlockTypeIdAt((int)(to.getX() < 0 ? to.getX()-1 : to.getX()), (int)to.getY(), (int)(to.getZ() < 0 ? to.getZ()-1 : to.getZ())) == 90) {
 			
-			//System.out.println("Player pushed a button");
+			//event.getPlayer().sendMessage("Button Pushed");
 			int orientationlevel = (int) to.getY()-1;
-			int oX = (int)to.getX();
-			int oZ = (int) to.getZ();
+			int oX = (int)(to.getX() < 0 ? to.getX()-1 : to.getX());
+			int oZ = (int)(to.getZ() < 0 ? to.getX()-1 : to.getZ());
 			int scode1 = 1;
 			int scode2 = 1;
 			//check for jukebox
 			int readdirection = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
-			if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==90) {
+			if(w.getBlockTypeIdAt((int)(to.getX() < 0 ? to.getX()-1 : to.getX()), (int)to.getY(),
+					(int)(to.getZ() < 0 ? to.getZ()-1 : to.getZ()))==90) {
 				orientationlevel = (int) to.getY()-2;
 				if(w.getBlockTypeIdAt(oX-1, orientationlevel, oZ)==84)
 					readdirection = 0;
@@ -129,7 +129,7 @@ public class PortalPlayerListener extends PlayerListener {
 				readdirection = 3;
 			if(w.getBlockTypeIdAt(oX, orientationlevel, oZ-1)==84)
 				readdirection = 1;
-			
+			//event.getPlayer().sendMessage("read_direction: "+readdirection);
 			if(readdirection == -1)
 				return;
 			else {
