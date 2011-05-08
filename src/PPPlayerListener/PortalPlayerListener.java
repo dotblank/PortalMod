@@ -27,6 +27,15 @@ public class PortalPlayerListener extends PlayerListener {
 		case 54: return 6;
 		case 47: return 6;
 		case 20: return 7;
+		case 35:
+		{
+			byte val = w.getBlockAt(X, Y, Z).getData()
+			if(val < 8 && val >0)
+				return val;
+			else
+				return 0;
+		}
+		break;
 		default: return 0;
 		}
 	}
