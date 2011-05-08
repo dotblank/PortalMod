@@ -1,6 +1,7 @@
 package us.discovr.portalplugin;
 
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -14,27 +15,24 @@ import PPPlayerListener.PortalPlayerListener;
 
 public class PortalPlugin extends JavaPlugin {
     private final PortalPlayerListener listener = new PortalPlayerListener(this);
+    //private PPListenerv2 listener = new PPListenerv2(this); //New version
     public final HashMap<Player, Location> lastposition = new HashMap<Player, Location>();
-    public PluginDescriptionFile pdfFile;
+    public PluginDescriptionFile pdf;
+    protected Properties config;
 
-    public void onDisable() { System.out.println("["+pdfFile.getName()+"] disabled!"); }
+    public void onDisable() { System.out.println("["+pdf.getName()+"] disabled!"); }
 
     public void onEnable() {
-    	pdfFile = this.getDescription();
-		//etc.getLoader().addListener(PluginLoader.Hook.PLAYER_MOVE, listener ,this,PluginListener.Priority.HIGH);
-		//etc.getLoader().addListener(PluginLoader.Hook.ARM_SWING, listener ,this,PluginListener.Priority.HIGH);
-		//etc.getLoader().addListener(PluginLoader.Hook.BLOCK_CREATED, listener ,this,PluginListener.Priority.HIGH);
+	pdf = this.getDescription();
 
-        // Register our events
-        PluginManager pm = getServer().getPluginManager();
-        pm.registerEvent(Event.Type.PLAYER_MOVE, listener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.PLAYER_QUIT, listener, Priority.Normal, this);
-        //pm.registerEvent(Event.Type.BLOCK_PHYSICS, blockListener, Priority.Normal, this);
-        //pm.registerEvent(Event.Type.BLOCK_CANBUILD, blockListener, Priority.Normal, this);
+	// Register our events
+	PluginManager pm = getServer().getPluginManager();
+	pm.registerEvent(Event.Type.PLAYER_MOVE, listener, Priority.Monitor, this);
+	pm.registerEvent(Event.Type.PLAYER_QUIT, listener, Priority.Normal, this);
 
-        // EXAMPLE: Custom code, here we just output some info so we can check all is well
-        int limit = getConfiguration().getInt("border-limit", 1000);
-        System.out.println(pdfFile.getName()+" version "+pdfFile.getVersion()+" is enabled!");
-        System.out.println("["+pdfFile.getName()+"] portal distance limit: "+limit);
+	// EXAMPLE: Custom code, here we just output some info so we can check all is well
+	//int limit = getConfiguration().getInt("border-limit", 1000);
+	System.out.println(pdf.getName()+" version "+pdf.getVersion()+" is enabled!");
+	//System.out.println("["+pdf.getName()+"] portal distance limit: "+limit);
     }
 }
