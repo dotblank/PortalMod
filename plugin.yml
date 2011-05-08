@@ -1,0 +1,6 @@
+name: PortalPlugin
+main: us.discovr.portalplugin.PortalPlugin
+version: 2.0
+authors:
+    - dotblank (Creator)
+    - HACKhalo2 (Matainer)
