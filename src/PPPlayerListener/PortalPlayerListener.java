@@ -9,53 +9,77 @@ import us.discovr.portalplugin.PortalPlugin;
 
 public class PortalPlayerListener extends PlayerListener {
     private final PortalPlugin plugin;
+    private enum Mode {Legacy,Wool};
 
     public PortalPlayerListener(PortalPlugin instance) {
 	plugin = instance;
     }
-	public int getEncodeVal(int X, int Z, int Y, World w) {
+	public int getEncodeVal(Mode m,int X, int Z, int Y, World w) {
 		int id = w.getBlockTypeIdAt(X, Y, Z);
-		//int id = w.getBlockTypeIdAt(X, Y, Z);
-		switch (id){
-		case 3: return 0;
-		case 2: return 0;
-		case 5: return 1; 
-		case 17: return 2; 
-		case 4: return 3;
-		case 58: return 4;
-		case 61: return 5;
-		case 54: return 6;
-		case 47: return 6;
-		case 20: return 7;
-		case 35:
+		if(m == Mode.Legacy)
 		{
-			byte val = w.getBlockAt(X, Y, Z).getData();
-			if(val < 8 && val >0)
+			//int id = w.getBlockTypeIdAt(X, Y, Z);
+			switch (id){
+			case 3: return 0;
+			case 2: return 0;
+			case 5: return 1; 
+			case 17: return 2;
+			case 4: return 3;
+			case 58: return 4;
+			case 61: return 5;
+			case 54: return 6;
+			case 47: return 6;
+			case 20: return 7;
+			case 35:
+			{
+				Byte b =  new Byte(w.getBlockAt(X, Y, Z).getData());
+				int val = b.intValue();
+				if(val < 8 && val > 0)
+					return val;
+				else
+					return 0;
+			}
+			default: return 0;
+			}
+		} else if (m == Mode.Wool)
+		{	
+			//int id = w.getBlockTypeIdAt(X, Y, Z);
+			switch (id){
+			case 35:
+			{
+				Byte b =  new Byte(w.getBlockAt(X, Y, Z).getData());
+				int val = b.intValue();
 				return val;
-			else
-				return 0;
+			}
+			default: return 0;
+			}
 		}
-		default: return 0;
-		}
+		return 0;
 	}
 	
-    private int find2dir(int x, int z , int y, World w) {
+    private int find2dir(Mode m,int x, int z , int y, World w) {
+    int anchor = 84;
+    if(m == Mode.Wool)
+    	anchor = 19;
 	int dir = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
-	if(w.getBlockTypeIdAt(x-1, y, z)==84 || w.getBlockTypeIdAt(x-2, y, z)==84)
+	if(w.getBlockTypeIdAt(x-1, y, z)==anchor || w.getBlockTypeIdAt(x-2, y, z)==anchor)
 		dir = 0;
-	if(w.getBlockTypeIdAt(x+1, y, z)==84 || w.getBlockTypeIdAt(x+2, y, z)==84)
+	if(w.getBlockTypeIdAt(x+1, y, z)==anchor || w.getBlockTypeIdAt(x+2, y, z)==anchor)
 		dir = 2;
-	if(w.getBlockTypeIdAt(x, y, z+1)==84 || w.getBlockTypeIdAt(x, y, z+2)==84)
+	if(w.getBlockTypeIdAt(x, y, z+1)==anchor || w.getBlockTypeIdAt(x, y, z+2)==anchor)
 		dir = 3;
-	if(w.getBlockTypeIdAt(x, y, z-1)==84 || w.getBlockTypeIdAt(x, y, z-2)==84)
+	if(w.getBlockTypeIdAt(x, y, z-1)==anchor || w.getBlockTypeIdAt(x, y, z-2)==anchor)
 		dir = 1;
 	return dir;
 
     }
-    private int convertbase(int[] code,int codenum) {
+    private int convertbase(Mode m, int[] code,int codenum) {
 	int total = 0;
+	int base = 8;
+	if(m == Mode.Wool)
+		base = 16;
 	for(int i = 0; i < codenum; i++) {
-	    total += code[i]*Math.pow(8, (codenum-1)-i);
+	    total += code[i]*Math.pow(base, (codenum-1)-i);
 	}
 	return (int) Math.ceil(total);
     }
@@ -96,22 +120,13 @@ public class PortalPlayerListener extends PlayerListener {
 	    //int oZ = modZ;
 	    int scode1 = 1;
 	    int scode2 = 1;
-	    //check for jukebox
+	    //Change elevation for nether portal
 	    int readdirection = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
 	    if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==90)
 	    {
-		orientationlevel = (int) to.getY()-2;
-		if(w.getBlockTypeIdAt(modX-1, orientationlevel, modZ)==84)
-		    readdirection = 0;
-		if(w.getBlockTypeIdAt(modX+1, orientationlevel, modZ)==84)
-		    readdirection = 2;
-		if(w.getBlockTypeIdAt(modX, orientationlevel, modZ+1)==84)
-		    readdirection = 3;
-		if(w.getBlockTypeIdAt(modX, orientationlevel, modZ-1)==84)
-		    readdirection = 1;
-		if(readdirection == -1)
-		    orientationlevel = (int) to.getY()-1;
+	    	orientationlevel = (int) to.getY()-2;
 	    }
+	    
 	    if(w.getBlockTypeIdAt(modX-1, orientationlevel, modZ)==84)
 		readdirection = 0;
 	    if(w.getBlockTypeIdAt(modX+1, orientationlevel, modZ)==84)
@@ -120,6 +135,23 @@ public class PortalPlayerListener extends PlayerListener {
 		readdirection = 3;
 	    if(w.getBlockTypeIdAt(modX, orientationlevel, modZ-1)==84)
 		readdirection = 1;
+	    Mode mode = Mode.Legacy;
+	    if(readdirection != -1)
+	    	mode = Mode.Legacy;
+	    
+	    if(readdirection == -1)
+	    {
+		    if(w.getBlockTypeIdAt(modX-1, orientationlevel, modZ)==19)
+			readdirection = 0;
+		    if(w.getBlockTypeIdAt(modX+1, orientationlevel, modZ)==19)
+			readdirection = 2;
+		    if(w.getBlockTypeIdAt(modX, orientationlevel, modZ+1)==19)
+			readdirection = 3;
+		    if(w.getBlockTypeIdAt(modX, orientationlevel, modZ-1)==19)
+			readdirection = 1;
+		    mode = Mode.Wool;
+	    }
+	    	
 
 	    if(readdirection == -1)
 		return;
@@ -136,117 +168,117 @@ public class PortalPlayerListener extends PlayerListener {
 		case -1:
 		    return; 
 		case 0:
-		    code1[0] = getEncodeVal(modX+1,modZ,orientationlevel,w);
-		    code1[1] = getEncodeVal(modX+1,modZ,orientationlevel-1,w);
-		    code1[2] = getEncodeVal(modX+1,modZ,orientationlevel-2,w);
-		    code1[3] = getEncodeVal(modX+1,modZ,orientationlevel-3,w);
+		    code1[0] = getEncodeVal(mode,modX+1,modZ,orientationlevel,w);
+		    code1[1] = getEncodeVal(mode,modX+1,modZ,orientationlevel-1,w);
+		    code1[2] = getEncodeVal(mode,modX+1,modZ,orientationlevel-2,w);
+		    code1[3] = getEncodeVal(mode,modX+1,modZ,orientationlevel-3,w);
 
-		    rotation = getEncodeVal(modX+1,modZ,orientationlevel-4,w)*45;
+		    rotation = getEncodeVal(mode,modX+1,modZ,orientationlevel-4,w)*45;
 		    scode1 = -1;
 		    xcodenum = 1;
-		    code2[0] = getEncodeVal(modX,modZ,orientationlevel-1,w);
-		    code2[1] = getEncodeVal(modX,modZ,orientationlevel-2,w);
-		    code2[2] = getEncodeVal(modX,modZ,orientationlevel-3,w);
-		    code2[3] = getEncodeVal(modX,modZ,orientationlevel-4,w);
-		    if(find2dir(modX, modZ, orientationlevel-3,w) != -1)
+		    code2[0] = getEncodeVal(mode,modX,modZ,orientationlevel-1,w);
+		    code2[1] = getEncodeVal(mode,modX,modZ,orientationlevel-2,w);
+		    code2[2] = getEncodeVal(mode,modX,modZ,orientationlevel-3,w);
+		    code2[3] = getEncodeVal(mode,modX,modZ,orientationlevel-4,w);
+		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
 			scode2 = -1;
 		    else
 			scode2 = 1;
 
 		    if(w.getBlockTypeIdAt(modX-1, orientationlevel-1, modZ)!=0)
 		    {
-			codeY[0] = getEncodeVal(modX-1,modZ,orientationlevel-1,w);
-			codeY[1] = getEncodeVal(modX-1,modZ,orientationlevel-2,w);
-			codeY[2] = getEncodeVal(modX-1,modZ,orientationlevel-3,w);
-			options = getEncodeVal(modX-1,modZ,orientationlevel-4,w);
+			codeY[0] = getEncodeVal(mode,modX-1,modZ,orientationlevel-1,w);
+			codeY[1] = getEncodeVal(mode,modX-1,modZ,orientationlevel-2,w);
+			codeY[2] = getEncodeVal(mode,modX-1,modZ,orientationlevel-3,w);
+			options = getEncodeVal(mode,modX-1,modZ,orientationlevel-4,w);
 			yset =true;
 		    }
 		    break;
 		case 1:
-		    code1[0] = getEncodeVal(modX,modZ+1,orientationlevel,w);
-		    code1[1] = getEncodeVal(modX,modZ+1,orientationlevel-1,w);
-		    code1[2] = getEncodeVal(modX,modZ+1,orientationlevel-2,w);
-		    code1[3] = getEncodeVal(modX,modZ+1,orientationlevel-3,w);
+		    code1[0] = getEncodeVal(mode,modX,modZ+1,orientationlevel,w);
+		    code1[1] = getEncodeVal(mode,modX,modZ+1,orientationlevel-1,w);
+		    code1[2] = getEncodeVal(mode,modX,modZ+1,orientationlevel-2,w);
+		    code1[3] = getEncodeVal(mode,modX,modZ+1,orientationlevel-3,w);
 
-		    rotation = getEncodeVal(modX,modZ+1,orientationlevel-4,w)*45;
+		    rotation = getEncodeVal(mode,modX,modZ+1,orientationlevel-4,w)*45;
 		    scode1 = -1;
 		    xcodenum = 2;
-		    code2[0] = getEncodeVal(modX,modZ,orientationlevel-1,w);
-		    code2[1] = getEncodeVal(modX,modZ,orientationlevel-2,w);
-		    code2[2] = getEncodeVal(modX,modZ,orientationlevel-3,w);
-		    code2[3] = getEncodeVal(modX,modZ,orientationlevel-4,w);
-		    if(find2dir(modX, modZ, orientationlevel-3,w) != -1)
+		    code2[0] = getEncodeVal(mode,modX,modZ,orientationlevel-1,w);
+		    code2[1] = getEncodeVal(mode,modX,modZ,orientationlevel-2,w);
+		    code2[2] = getEncodeVal(mode,modX,modZ,orientationlevel-3,w);
+		    code2[3] = getEncodeVal(mode,modX,modZ,orientationlevel-4,w);
+		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
 			scode2 = -1;
 		    else
 			scode2 = 1;
 
 		    if(w.getBlockTypeIdAt(modX, orientationlevel-1, modZ-1)!=0)
 		    {
-			codeY[0] = getEncodeVal(modX,modZ-1,orientationlevel-1,w);
-			codeY[1] = getEncodeVal(modX,modZ-1,orientationlevel-2,w);
-			codeY[2] = getEncodeVal(modX,modZ-1,orientationlevel-3,w);
-			options = getEncodeVal(modX,modZ-1,orientationlevel-4,w);
+			codeY[0] = getEncodeVal(mode,modX,modZ-1,orientationlevel-1,w);
+			codeY[1] = getEncodeVal(mode,modX,modZ-1,orientationlevel-2,w);
+			codeY[2] = getEncodeVal(mode,modX,modZ-1,orientationlevel-3,w);
+			options = getEncodeVal(mode,modX,modZ-1,orientationlevel-4,w);
 			yset =true;
 		    }
 		    break;
 		case 2:
-		    code1[0] = getEncodeVal(modX-1,modZ,orientationlevel,w);
-		    code1[1] = getEncodeVal(modX-1,modZ,orientationlevel-1,w);
-		    code1[2] = getEncodeVal(modX-1,modZ,orientationlevel-2,w);
-		    code1[3] = getEncodeVal(modX-1,modZ,orientationlevel-3,w);
+		    code1[0] = getEncodeVal(mode,modX-1,modZ,orientationlevel,w);
+		    code1[1] = getEncodeVal(mode,modX-1,modZ,orientationlevel-1,w);
+		    code1[2] = getEncodeVal(mode,modX-1,modZ,orientationlevel-2,w);
+		    code1[3] = getEncodeVal(mode,modX-1,modZ,orientationlevel-3,w);
 
-		    rotation = getEncodeVal(modX-1,modZ,orientationlevel-4,w)*45;
+		    rotation = getEncodeVal(mode,modX-1,modZ,orientationlevel-4,w)*45;
 		    scode1 = 1;
 		    xcodenum = 1;
-		    code2[0] = getEncodeVal(modX,modZ,orientationlevel-1,w);
-		    code2[1] = getEncodeVal(modX,modZ,orientationlevel-2,w);
-		    code2[2] = getEncodeVal(modX,modZ,orientationlevel-3,w);
-		    code2[3] = getEncodeVal(modX,modZ,orientationlevel-4,w);
-		    if(find2dir(modX, modZ, orientationlevel-3,w) != -1)
+		    code2[0] = getEncodeVal(mode,modX,modZ,orientationlevel-1,w);
+		    code2[1] = getEncodeVal(mode,modX,modZ,orientationlevel-2,w);
+		    code2[2] = getEncodeVal(mode,modX,modZ,orientationlevel-3,w);
+		    code2[3] = getEncodeVal(mode,modX,modZ,orientationlevel-4,w);
+		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
 			scode2 = 1;
 		    else
 			scode2 = -1;
 
 		    if(w.getBlockTypeIdAt(modX+1, orientationlevel-1, modZ)!=0)
 		    {
-			codeY[0] = getEncodeVal(modX+1,modZ,orientationlevel-1,w);
-			codeY[1] = getEncodeVal(modX+1,modZ,orientationlevel-2,w);
-			codeY[2] = getEncodeVal(modX+1,modZ,orientationlevel-3,w);
-			options = getEncodeVal(modX+1,modZ,orientationlevel-4,w);
+			codeY[0] = getEncodeVal(mode,modX+1,modZ,orientationlevel-1,w);
+			codeY[1] = getEncodeVal(mode,modX+1,modZ,orientationlevel-2,w);
+			codeY[2] = getEncodeVal(mode,modX+1,modZ,orientationlevel-3,w);
+			options = getEncodeVal(mode,modX+1,modZ,orientationlevel-4,w);
 			yset =true;
 		    }
 		    break;
 		case 3:
-		    code1[0] = getEncodeVal(modX,modZ-1,orientationlevel,w);
-		    code1[1] = getEncodeVal(modX,modZ-1,orientationlevel-1,w);
-		    code1[2] = getEncodeVal(modX,modZ-1,orientationlevel-2,w);
-		    code1[3] = getEncodeVal(modX,modZ-1,orientationlevel-3,w);
+		    code1[0] = getEncodeVal(mode,modX,modZ-1,orientationlevel,w);
+		    code1[1] = getEncodeVal(mode,modX,modZ-1,orientationlevel-1,w);
+		    code1[2] = getEncodeVal(mode,modX,modZ-1,orientationlevel-2,w);
+		    code1[3] = getEncodeVal(mode,modX,modZ-1,orientationlevel-3,w);
 
 
-		    rotation = getEncodeVal(modX,modZ-1,orientationlevel-4,w)*45;
+		    rotation = getEncodeVal(mode,modX,modZ-1,orientationlevel-4,w)*45;
 		    scode1 = 1;
 		    xcodenum = 2;
-		    code2[0] = getEncodeVal(modX,modZ,orientationlevel-1,w);
-		    code2[1] = getEncodeVal(modX,modZ,orientationlevel-2,w);
-		    code2[2] = getEncodeVal(modX,modZ,orientationlevel-3,w);
-		    code2[3] = getEncodeVal(modX,modZ,orientationlevel-4,w);
-		    if(find2dir(modX, modZ, orientationlevel-3,w) != -1)
+		    code2[0] = getEncodeVal(mode,modX,modZ,orientationlevel-1,w);
+		    code2[1] = getEncodeVal(mode,modX,modZ,orientationlevel-2,w);
+		    code2[2] = getEncodeVal(mode,modX,modZ,orientationlevel-3,w);
+		    code2[3] = getEncodeVal(mode,modX,modZ,orientationlevel-4,w);
+		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
 			scode2 = 1;
 		    else
 			scode2 = -1;
 
 		    if(w.getBlockTypeIdAt(modX, orientationlevel-1, modZ+1)!=0)
 		    {
-			codeY[0] = getEncodeVal(modX,modZ+1,orientationlevel-1,w);
-			codeY[1] = getEncodeVal(modX,modZ+1,orientationlevel-2,w);
-			codeY[2] = getEncodeVal(modX,modZ+1,orientationlevel-3,w);
-			options = getEncodeVal(modX,modZ+1,orientationlevel-4,w);
+			codeY[0] = getEncodeVal(mode,modX,modZ+1,orientationlevel-1,w);
+			codeY[1] = getEncodeVal(mode,modX,modZ+1,orientationlevel-2,w);
+			codeY[2] = getEncodeVal(mode,modX,modZ+1,orientationlevel-3,w);
+			options = getEncodeVal(mode,modX,modZ+1,orientationlevel-4,w);
 			yset = true;
 		    }
 		    break;
 		}
-		int goto1 = convertbase(code1,4)*scode1;
-		int goto2 = convertbase(code2,4)*scode2;
+		int goto1 = convertbase(mode,code1,4)*scode1;
+		int goto2 = convertbase(mode,code2,4)*scode2;
 		Location loc = new Location(w, 0,0,0);
 		if(xcodenum == 1)
 		{
@@ -264,7 +296,9 @@ public class PortalPlayerListener extends PlayerListener {
 		}
 		int gotoY = 126;
 		if(yset)
-		    gotoY = 164-convertbase(codeY,3);
+		    gotoY = 164-convertbase(mode,codeY,3);
+		if(gotoY <= 0)
+			gotoY = 1;
 		loc.setY(gotoY);
 		if(options == 0 || options == 2)
 		    loc.setYaw(event.getPlayer().getLocation().getYaw() + rotation);
