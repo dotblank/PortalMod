@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.World;
 import us.discovr.portalplugin.PortalPlugin;
 
@@ -122,7 +123,7 @@ public class PortalPlayerListener extends PlayerListener {
 	    int scode2 = 1;
 	    //Change elevation for nether portal
 	    int readdirection = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
-	    if(w.getBlockTypeIdAt((int)to.getX(), (int)to.getY(), (int)to.getZ())==90)
+	    if(w.getBlockTypeIdAt(modX, (int)to.getY(), modZ)==90)
 	    {
 	    	orientationlevel = (int) to.getY()-2;
 	    }
@@ -298,7 +299,7 @@ public class PortalPlayerListener extends PlayerListener {
 		if(yset)
 		    gotoY = 164-convertbase(mode,codeY,3);
 		if(gotoY <= 0)
-			gotoY = 1;
+			gotoY = 2;
 		loc.setY(gotoY);
 		if(options == 0 || options == 2)
 		    loc.setYaw(event.getPlayer().getLocation().getYaw() + rotation);
@@ -314,12 +315,11 @@ public class PortalPlayerListener extends PlayerListener {
 		loc.setZ(loc.getZ() +0.5f);
 		//else
 		//	loc.z += 0.5f;
-		/*
+		
 		int limit = plugin.getConfiguration().getInt("border-limit", 1000);
 		if(Math.abs(loc.getX()-event.getPlayer().getWorld().getSpawnLocation().getX())<=limit 
 			&& Math.abs(loc.getZ()-event.getPlayer().getWorld().getSpawnLocation().getZ())<=limit)
 		{
-*/
 		    event.getPlayer().sendMessage(ChatColor.DARK_GRAY+"Teleporting to "+loc.getX()+" "+loc.getY()+" "+loc.getZ());
 			//event.getPlayer().teleportTo(loc);
 			if(!event.getPlayer().teleport(loc)) {
@@ -327,15 +327,13 @@ public class PortalPlayerListener extends PlayerListener {
 				return;
 			}
 			event.setTo(loc);
-		/*
 		} else {
 			event.getPlayer().sendMessage(ChatColor.RED+"Cannot Teleport you to "+loc.getX()+" "+
 					loc.getY()+" "+loc.getZ());
-*/
 		}
 
 	    }
-	//}
+	}
 
 	return;
     }
