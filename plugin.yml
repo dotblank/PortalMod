@@ -1,5 +1,5 @@
 name: PortalPlugin
-main: us.discovr.portalplugin.PortalPlugin
+main: com.precipicegames.portalplugin.PortalPlugin
 version: 2.0
 authors:
     - dotblank (Creator)
