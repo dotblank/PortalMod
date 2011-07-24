@@ -136,17 +136,8 @@ public class PortalPlayerListener extends PlayerListener {
 	    	orientationlevel = (int) to.getY()-2;
 	    }
 	    
-	    if(w.getBlockTypeIdAt(modX-1, orientationlevel, modZ)==84)
-		readdirection = 0;
-	    if(w.getBlockTypeIdAt(modX+1, orientationlevel, modZ)==84)
-		readdirection = 2;
-	    if(w.getBlockTypeIdAt(modX, orientationlevel, modZ+1)==84)
-		readdirection = 3;
-	    if(w.getBlockTypeIdAt(modX, orientationlevel, modZ-1)==84)
-		readdirection = 1;
+
 	    Mode mode = Mode.Legacy;
-	    if(readdirection != -1)
-	    	mode = Mode.Legacy;
 	    
 	    if(readdirection == -1)
 	    {
@@ -251,6 +242,12 @@ public class PortalPlayerListener extends PlayerListener {
 		loc.setZ(loc.getZ() +0.5f);
 		//else
 		//	loc.z += 0.5f;
+		if(gotoY == 255)
+		{
+			gotoY = w.getHighestBlockYAt(loc);
+			loc.setY(gotoY + 0.5f);
+		}
+
 		
 		int limit = plugin.getConfiguration().getInt("border-limit", 1000);
 		Location center = event.getPlayer().getWorld().getSpawnLocation();
