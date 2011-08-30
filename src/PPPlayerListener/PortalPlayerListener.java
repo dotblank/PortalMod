@@ -1,6 +1,9 @@
 package PPPlayerListener;
+import java.util.HashSet;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -11,38 +14,19 @@ import com.precipicegames.portalplugin.PortalPlugin;
 public class PortalPlayerListener extends PlayerListener {
     private final PortalPlugin plugin;
     private enum Mode {Legacy,Wool};
+    private final HashSet<Player> inTransit;
 
     public PortalPlayerListener(PortalPlugin instance) {
 	plugin = instance;
+	inTransit = new HashSet<Player>();
+    }
+    public synchronized void transitComplete(Player p)
+    {
+    	inTransit.remove(p);
     }
 	public int getEncodeVal(Mode m,int X, int Z, int Y, World w) {
 		int id = w.getBlockTypeIdAt(X, Y, Z);
-		if(m == Mode.Legacy)
-		{
-			//int id = w.getBlockTypeIdAt(X, Y, Z);
-			switch (id){
-			case 3: return 0;
-			case 2: return 0;
-			case 5: return 1; 
-			case 17: return 2;
-			case 4: return 3;
-			case 58: return 4;
-			case 61: return 5;
-			case 54: return 6;
-			case 47: return 6;
-			case 20: return 7;
-			case 35:
-			{
-				Byte b =  new Byte(w.getBlockAt(X, Y, Z).getData());
-				int val = b.intValue();
-				if(val < 8 && val > 0)
-					return val;
-				else
-					return 0;
-			}
-			default: return 0;
-			}
-		} else if (m == Mode.Wool)
+		if (m == Mode.Wool)
 		{	
 			//int id = w.getBlockTypeIdAt(X, Y, Z);
 			switch (id){
@@ -68,22 +52,6 @@ public class PortalPlayerListener extends PlayerListener {
 		return convertbase(m,codes,depth);
 	}
 	
-    private int find2dir(Mode m,int x, int z , int y, World w) {
-    int anchor = 84;
-    if(m == Mode.Wool)
-    	anchor = 19;
-	int dir = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
-	if(w.getBlockTypeIdAt(x-1, y, z)==anchor || w.getBlockTypeIdAt(x-2, y, z)==anchor)
-		dir = 0;
-	if(w.getBlockTypeIdAt(x+1, y, z)==anchor || w.getBlockTypeIdAt(x+2, y, z)==anchor)
-		dir = 2;
-	if(w.getBlockTypeIdAt(x, y, z+1)==anchor || w.getBlockTypeIdAt(x, y, z+2)==anchor)
-		dir = 3;
-	if(w.getBlockTypeIdAt(x, y, z-1)==anchor || w.getBlockTypeIdAt(x, y, z-2)==anchor)
-		dir = 1;
-	return dir;
-
-    }
     private int convertbase(Mode m, int[] code,int codenum) {
 	int total = 0;
 	int base = 8;
@@ -137,7 +105,7 @@ public class PortalPlayerListener extends PlayerListener {
 	    }
 	    
 
-	    Mode mode = Mode.Legacy;
+	    Mode mode = Mode.Wool;
 	    
 	    if(readdirection == -1)
 	    {
@@ -167,9 +135,9 @@ public class PortalPlayerListener extends PlayerListener {
 		    return; 
 		case 0:
 			goto1 = -readColumn(modX+1,modZ, orientationlevel-1, 4, mode, w);
-			rotation = readColumn(modX-1,modZ, orientationlevel-4, 1, mode, w)*45;
+			rotation = readColumn(modX-1,modZ, orientationlevel-3, 1, mode, w)*45;
 		    xcodenum = 1;
-		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
+		    if(w.getBlockTypeIdAt(modX-1, orientationlevel-4, modZ)==19)
 		    goto2 = -readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
 		    else
 			goto2 = readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
@@ -178,9 +146,9 @@ public class PortalPlayerListener extends PlayerListener {
 		    break;
 		case 1:
 			goto1 = -readColumn(modX,modZ+1, orientationlevel-1, 4, mode, w);
-			rotation = readColumn(modX,modZ-1, orientationlevel-4, 1, mode, w)*45;
+			rotation = readColumn(modX,modZ-1, orientationlevel-3, 1, mode, w)*45;
 		    xcodenum = 2;
-		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
+		    if(w.getBlockTypeIdAt(modX, orientationlevel-4, modZ-1)==19)
 		    goto2 = -readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
 		    else
 			goto2 = readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
@@ -189,9 +157,9 @@ public class PortalPlayerListener extends PlayerListener {
 		    break;
 		case 2:
 			goto1 = readColumn(modX-1,modZ, orientationlevel-1, 4, mode, w);
-			rotation = readColumn(modX+1,modZ, orientationlevel-4, 1, mode, w)*45;
+			rotation = readColumn(modX+1,modZ, orientationlevel-3, 1, mode, w)*45;
 		    xcodenum = 1;
-		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
+		    if(w.getBlockTypeIdAt(modX+1, orientationlevel-4, modZ)==19)
 		    goto2 = readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
 		    else
 			goto2 = -readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
@@ -200,9 +168,9 @@ public class PortalPlayerListener extends PlayerListener {
 		    break;
 		case 3:
 			goto1 = readColumn(modX,modZ-1, orientationlevel-1, 4, mode, w);
-			rotation = readColumn(modX,modZ+1, orientationlevel-4, 1, mode, w)*45;
+			rotation = readColumn(modX,modZ+1, orientationlevel-3, 1, mode, w)*45;
 		    xcodenum = 2;
-		    if(find2dir(mode,modX, modZ, orientationlevel-3,w) != -1)
+		    if(w.getBlockTypeIdAt(modX, orientationlevel-4, modZ+1)==19)
 		    goto2 = readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
 		    else
 			goto2 = -readColumn(modX,modZ, orientationlevel-1, 4, mode, w);
@@ -242,11 +210,7 @@ public class PortalPlayerListener extends PlayerListener {
 		loc.setZ(loc.getZ() +0.5f);
 		//else
 		//	loc.z += 0.5f;
-		if(gotoY == 255)
-		{
-			gotoY = w.getHighestBlockYAt(loc);
-			loc.setY(gotoY + 0.5f);
-		}
+
 
 		
 		int limit = plugin.getConfiguration().getInt("border-limit", 1000);
@@ -260,11 +224,12 @@ public class PortalPlayerListener extends PlayerListener {
 		{
 		    event.getPlayer().sendMessage(ChatColor.DARK_GRAY+"Teleporting to "+loc.getX()+" "+loc.getY()+" "+loc.getZ());
 			//event.getPlayer().teleportTo(loc);
-			if(!event.getPlayer().teleport(loc)) {
-				event.getPlayer().sendMessage(ChatColor.RED+"Something went terribly wrong with the teleport! It didn't work!");
-				return;
-			}
-			event.setTo(loc);
+		    if(inTransit.contains(event.getPlayer()))
+		    	return; //Already in transit;
+		    inTransit.add(event.getPlayer());
+		    PortalSafeTeleporter t = new PortalSafeTeleporter(event.getPlayer(),loc,this);
+		    t.start();
+			//event.setTo(loc);
 		} else {
 			event.getPlayer().sendMessage(ChatColor.RED+"Cannot Teleport you to "+loc.getX()+" "+
 					loc.getY()+" "+loc.getZ());
