@@ -2,13 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.precipicegames</groupId>
   <artifactId>PortalPlugin</artifactId>
-  <version>4.1</version>
-  <name>Ghost</name>
+  <version>4.2</version>
+  <name>PortalMod</name>
   <dependencies>
   	<dependency>
   		<groupId>org.bukkit</groupId>
   		<artifactId>bukkit</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
+  		<version>1.1-R5</version>
   	</dependency>
   </dependencies>
 </project>

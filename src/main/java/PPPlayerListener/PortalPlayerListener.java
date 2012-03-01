@@ -4,14 +4,15 @@ import java.util.HashSet;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.Listener;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.World;
 
 import com.precipicegames.portalplugin.PortalPlugin;
 
-public class PortalPlayerListener extends PlayerListener {
+public class PortalPlayerListener implements Listener {
     private final PortalPlugin plugin;
     private enum Mode {Legacy,Wool};
     private final HashSet<Player> inTransit;
@@ -63,12 +64,12 @@ public class PortalPlayerListener extends PlayerListener {
 	return (int) Math.ceil(total);
     }
 
-    @Override
+    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
 	plugin.lastposition.remove(event.getPlayer());
     }
     
-    @Override
+    @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
 
 	if(event.isCancelled())
