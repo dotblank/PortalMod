@@ -1,10 +1,7 @@
 package PPPlayerListener;
 
-import java.util.HashSet;
-
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -12,25 +9,20 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.World;
 
 import com.precipicegames.portalplugin.PortalPlugin;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class PortalPlayerListener implements Listener {
 
     private final PortalPlugin plugin;
 
-    private enum Mode {
-
+    public enum Mode {
         Legacy, Wool
     };
-    private final HashSet<Player> inTransit;
 
     public PortalPlayerListener(PortalPlugin instance) {
         plugin = instance;
-        inTransit = new HashSet<Player>();
     }
 
-    public synchronized void transitComplete(Player p) {
-        inTransit.remove(p);
-    }
 
     public int getEncodeVal(Mode m, int X, int Z, int Y, World w) {
         int id = w.getBlockTypeIdAt(X, Y, Z);
@@ -76,7 +68,6 @@ public class PortalPlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
-
         if (event.isCancelled()) {
             return;
         }
@@ -95,23 +86,21 @@ public class PortalPlayerListener implements Listener {
         }
         World w = event.getPlayer().getWorld();
         plugin.lastposition.put(event.getPlayer(), to);
-        //System.out.println("Player " + event.getPlayer().getName() + " moved a block");
 
         int modX = (int) (to.getX() < 0 ? to.getX() - 1 : to.getX());
         int modZ = (int) (to.getZ() < 0 ? to.getZ() - 1 : to.getZ());
+        
+        int block = w.getBlockTypeIdAt(modX, (int) to.getY(), modZ);
 
-        if (w.getBlockTypeIdAt(modX, (int) to.getY(), modZ) == 70 || w.getBlockTypeIdAt(modX, (int) to.getY(), modZ) == 90 || w.getBlockTypeIdAt(modX, (int) to.getY(), modZ) == 119) {
+        if (block == 70 || block == 90 || block == 119) {
 
-            //System.out.println("Player pushed a button");
             int orientationlevel = (int) to.getY() - 1;
-            //int oX = modX;
-            //int oZ = modZ;
+
             //Change elevation for nether portal
             int readdirection = -1; //0 is for +x 1 is +z 2 is -x 3 is -z
-            if (w.getBlockTypeIdAt(modX, (int) to.getY(), modZ) == 90) {
+            if (block == 90) {
                 orientationlevel = (int) to.getY() - 2;
             }
-
 
             Mode mode = Mode.Wool;
 
@@ -195,15 +184,11 @@ public class PortalPlayerListener implements Listener {
                 Location loc = new Location(w, 0, 0, 0);
                 if (xcodenum == 1) {
                     loc.setX(modX + goto1);
-                    //loc.x = oX+goto1;
                     loc.setZ(modZ + goto2);
-                    //loc.z = oZ+goto2;
                 }
                 if (xcodenum == 2) {
                     loc.setX(modX + goto2);
-                    //loc.x = oX+goto2;
                     loc.setZ(modZ + goto1);
-                    //loc.z = oZ+goto1;
                 }
                 if (gotoY <= 0) {
                     gotoY = 2;
@@ -228,26 +213,20 @@ public class PortalPlayerListener implements Listener {
 
 
                 int limit = plugin.config.getInt("border-limit", 1000);
-                Location center = event.getPlayer().getWorld().getSpawnLocation();
+                Location center = null;
                 if (plugin.config.getBoolean("center-origin", false)) {
                     center = new Location(event.getPlayer().getWorld(), 0, 0, 0);
+                } else {
+                    center = event.getPlayer().getWorld().getSpawnLocation();
                 }
                 if (Math.abs(loc.getX() - center.getX()) <= limit
                         && Math.abs(loc.getZ() - center.getZ()) <= limit) {
                     event.getPlayer().sendMessage(ChatColor.DARK_GRAY + "Teleporting to " + loc.getX() + " " + loc.getY() + " " + loc.getZ());
-                    //event.getPlayer().teleportTo(loc);
-                    if (inTransit.contains(event.getPlayer())) {
-                        return; //Already in transit;
-                    }
-                    inTransit.add(event.getPlayer());
-                    PortalSafeTeleporter t = new PortalSafeTeleporter(event.getPlayer(), loc, this);
-                    t.start();
-                    //event.setTo(loc);
+                    event.getPlayer().teleport(loc, TeleportCause.PLUGIN);
                 } else {
                     event.getPlayer().sendMessage(ChatColor.RED + "Cannot Teleport you to " + loc.getX() + " "
                             + loc.getY() + " " + loc.getZ());
                 }
-
             }
         }
         return;
